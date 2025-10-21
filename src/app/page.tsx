@@ -93,9 +93,9 @@ export default function Home() {
 
       <main className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-lg">
         <TextareaAutosize
-          minRows={4}
-          maxRows={10}
-          className="w-full p-4 text-lg border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6 bg-gray-900 text-white"
+          minRows={5}
+          maxRows={16}
+          className="w-full p-4 text-lg border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6 bg-gray-900 text-white leading-relaxed"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           placeholder="ป้อนข้อความของคุณที่นี่..."
@@ -126,18 +126,36 @@ export default function Home() {
         )}
 
         {result && !isLoading && (
-          <div className="mt-6 p-4 bg-gray-700 rounded-md space-y-3">
+          <div className="mt-6 p-5 bg-gray-700/80 rounded-md space-y-4 border border-gray-600/60">
             <div className="flex items-center justify-between">
               <p className="text-lg font-semibold text-white">ผลลัพธ์</p>
               <span className="px-2 py-1 text-sm rounded bg-blue-500/20 text-blue-200 border border-blue-500/40">
                 ความมั่นใจ: {result.confidence}
               </span>
             </div>
-            <div className="grid grid-cols-1 gap-2">
-              <p className="text-4xl font-black text-blue-300">{result.score}/100</p>
-              <p className="text-md font-semibold text-gray-100">{result.verdict}</p>
-              <p className="text-sm text-gray-300 leading-relaxed">{result.roast}</p>
-              <p className="text-sm text-green-200 leading-relaxed">คำแนะนำ: {result.advice}</p>
+            <div className="grid grid-cols-1 gap-3">
+              <div className="flex items-baseline gap-3">
+                <p className="text-4xl font-black text-blue-300 drop-shadow">{result.score}/100</p>
+                <span className="text-sm text-gray-300">คะแนนความเสร่อโดยประมาณ</span>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm uppercase tracking-wide text-blue-200/70">Verdict</p>
+                <p className="text-base font-semibold text-gray-100 whitespace-pre-line leading-relaxed">
+                  {result.verdict}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm uppercase tracking-wide text-pink-200/70">Roast</p>
+                <p className="text-sm text-gray-200 whitespace-pre-line leading-7">
+                  {result.roast}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm uppercase tracking-wide text-green-200/70">Advice</p>
+                <p className="text-sm text-green-200 whitespace-pre-line leading-7">
+                  {result.advice}
+                </p>
+              </div>
             </div>
           </div>
         )}
