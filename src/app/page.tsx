@@ -16,6 +16,101 @@ type SeroResult = {
 type ThemeMode = "light" | "dark";
 
 const THEME_STORAGE_KEY = "checksero_theme";
+const SAMPLE_INPUTS = [
+  'เพื่อนเวรโพสต์ว่า "ปีนี้ต้องรวย" ทั้งที่หนี้บัตรเครดิตยังพะรุงพะรัง กูต้องจวกแม่งยังไงให้เข็ด',
+  "กูนั่ง MRT แล้วมีคนเปิดเพลงดังทำฟอร์มใหญ่อีก กูควรตะคอกกลับยังไงให้มันหลบหน้า",
+  "ไอ้สัสในทีมชอบขโมยเครดิตงานกู จะใส่เสียดายังไงไม่ให้โดน HR ฟาดกลับ",
+  "มันแซะว่ากูยังใช้มือถือรุ่นเก่าอยู่ จัดหมัดคำด่ายังไงให้มันเงิบ",
+] as const;
+
+type ScoreTierConfig = {
+  label: string;
+  description: string;
+  badge: {
+    light: string;
+    dark: string;
+  };
+  bar: {
+    light: string;
+    dark: string;
+  };
+};
+
+const SCORE_TIERS: Array<{ min: number; config: ScoreTierConfig }> = [
+  {
+    min: 85,
+    config: {
+      label: "ไฟลุกทั้งซอย",
+      description:
+        "ระดับความเสร่อมึงพุ่งเกินร้อย กูนี่อยากจับหัวมันกดฝาท่อแล้วเผายับซ้ำอีกที",
+      badge: {
+        light: "border-rose-200 bg-rose-100/80 text-rose-600",
+        dark: "border-rose-500/50 bg-rose-500/20 text-rose-200",
+      },
+      bar: {
+        light: "from-rose-400 via-amber-400 to-yellow-300",
+        dark: "from-rose-400 via-amber-300 to-yellow-200",
+      },
+    },
+  },
+  {
+    min: 60,
+    config: {
+      label: "เกรียนไฟลุก",
+      description:
+        "ดีกรีเสร่อของมันนี่เกิดเป็นไวรัลได้ กูจะด่าแทนให้เละอย่าให้เหลือซาก",
+      badge: {
+        light: "border-amber-200 bg-amber-100/80 text-amber-600",
+        dark: "border-amber-500/40 bg-amber-500/15 text-amber-200",
+      },
+      bar: {
+        light: "from-amber-400 via-orange-300 to-lime-200",
+        dark: "from-amber-300 via-orange-300 to-lime-200",
+      },
+    },
+  },
+  {
+    min: 35,
+    config: {
+      label: "เริ่มแสบคัน",
+      description:
+        "ยังไม่ถึงขั้นไฟลุก แต่มึงแค่สะกิดกูก็พร้อมเคลือบแผลด้วยลวดหนามให้มันจุก",
+      badge: {
+        light: "border-sky-200 bg-sky-100/80 text-sky-600",
+        dark: "border-sky-500/40 bg-sky-500/15 text-sky-200",
+      },
+      bar: {
+        light: "from-sky-400 via-cyan-300 to-emerald-200",
+        dark: "from-sky-300 via-cyan-300 to-emerald-200",
+      },
+    },
+  },
+  {
+    min: 0,
+    config: {
+      label: "พอขำๆ",
+      description:
+        "ยังเสร่อไม่สุด แต่กูก็คันปากอยากตบสลับข้างให้วงมันมีสีสันหน่อย",
+      badge: {
+        light: "border-slate-200 bg-slate-100/80 text-slate-600",
+        dark: "border-slate-600/50 bg-slate-800/40 text-slate-200",
+      },
+      bar: {
+        light: "from-slate-300 via-slate-200 to-slate-100",
+        dark: "from-slate-500 via-slate-600 to-slate-700",
+      },
+    },
+  },
+];
+
+const getScoreTier = (score: number): ScoreTierConfig => {
+  for (const tier of SCORE_TIERS) {
+    if (score >= tier.min) {
+      return tier.config;
+    }
+  }
+  return SCORE_TIERS[SCORE_TIERS.length - 1]!.config;
+};
 
 export default function Home() {
   const [inputText, setInputText] = useState("");
@@ -28,6 +123,7 @@ export default function Home() {
   const [theme, setTheme] = useState<ThemeMode>("light");
   const [isThemeReady, setIsThemeReady] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
   const themeSwitchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const applyTheme = useCallback((mode: ThemeMode) => {
@@ -122,11 +218,21 @@ export default function Home() {
     }, 80);
   };
 
+  const handleSamplePrompt = (sample: string) => {
+    setInputText(sample);
+    setResult(null);
+    setErrorMessage(null);
+    setTimeout(() => {
+      textAreaRef.current?.focus();
+      textAreaRef.current?.setSelectionRange(sample.length, sample.length);
+    }, 60);
+  };
+
   const checkSero = async () => {
     if (!inputText.trim()) {
       setResult(null);
       setErrorMessage(
-        "พิมพ์ข้อความเห่ยๆ มาก่อนดิ จะให้ AI เดายังไงว่าเสร่อระดับไหน",
+        "พิมพ์ข้อความเห่ยๆ มาก่อนดิ มึงจะให้กูเดาคะแนนเสร่อจากอากาศหรือไง",
       );
       return;
     }
@@ -154,7 +260,7 @@ export default function Home() {
 
       if (!res.ok || data?.error) {
         setErrorMessage(
-          data?.error ?? "API งอแงอีกแล้วว่ะ ลองใหม่อีกทีหน่อย",
+          data?.error ?? "API งอแงอีกแล้วว่ะ มึงลองกดใหม่อีกรอบดิ",
         );
         return;
       }
@@ -162,7 +268,7 @@ export default function Home() {
       setResult(data);
     } catch (error) {
       console.error("Error:", error);
-      setErrorMessage("เน็ตหรือ API แม่งล่ม ลองใหม่อีกรอบละกัน");
+      setErrorMessage("เน็ตหรือ API แม่งล่ม กูว่ามึงลองใหม่อีกรอบดิ");
     } finally {
       setIsLoading(false);
       setTimeout(() => {
@@ -216,6 +322,28 @@ export default function Home() {
     ? "border-emerald-400/30 bg-emerald-400/10"
     : "border-emerald-200/70 bg-emerald-100/55";
 
+  const progressTrackClass = isDark
+    ? "bg-slate-800/70"
+    : "bg-slate-200/80";
+
+  const scoreTier = result ? getScoreTier(result.score) : null;
+  const tierBadgeClass = scoreTier
+    ? isDark
+      ? scoreTier.badge.dark
+      : scoreTier.badge.light
+    : "";
+  const tierBarGradient = scoreTier
+    ? isDark
+      ? scoreTier.bar.dark
+      : scoreTier.bar.light
+    : "";
+
+  const sampleChipBase = isDark
+    ? "border-slate-700/60 bg-slate-900/45 text-slate-200 hover:border-slate-500 hover:bg-slate-900/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-300"
+    : "border-slate-200 bg-white/80 text-slate-600 hover:border-slate-400/80 hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-500";
+
+  const normalizedScore = result ? Math.min(Math.max(result.score, 0), 100) : 0;
+
   return (
     <div
       className={`relative flex min-h-screen flex-col items-center overflow-hidden px-4 transition-colors duration-500 ${isDark ? "text-slate-100" : "text-slate-900"} ${isShaking ? "animate-shake" : ""}`}
@@ -259,7 +387,7 @@ export default function Home() {
               CheckSero Lab
             </span>
             <p className="text-lg font-semibold md:text-xl">
-              AI วิเคราะห์ความเสร่อแบบถึงใจ เปิด 24 ชั่วโมง
+              AI กูนั่งเฝ้าความเสร่อให้มึงตลอด 24 ชั่วโมง
             </p>
           </div>
           <button
@@ -272,7 +400,7 @@ export default function Home() {
             ) : (
               <MoonIcon className="h-4 w-4" />
             )}
-            <span>{isDark ? "โหมดสว่าง" : "โหมดมืด"}</span>
+            <span>{isDark ? "เอาให้สว่างหน่อย" : "ขอความมืดให้กูที"}</span>
           </button>
         </nav>
 
@@ -281,14 +409,13 @@ export default function Home() {
             <span
               className={`inline-flex items-center rounded-full border px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] transition-colors duration-500 ${badgeSurface}`}
             >
-              Roast Mode
+              กูพร้อมจวก
             </span>
             <h1 className="text-4xl font-black leading-tight md:text-5xl">
-              ให้ AI จวกความเสร่อแทนคุณแบบถึงพริกถึงขิง
+              ให้ AI กูจวกความเสร่อแทนมึงแบบถึงพริกถึงขิง
             </h1>
             <p className={`text-base leading-relaxed ${accentText}`}>
-              ส่งข้อความที่คิดว่าเสร่อมาเหอะ เดี๋ยวระบบนี้จัดการด่าให้
-              พร้อมสกอร์และคำแนะนำแบบกวนๆ เอาไปขยี้ต่อได้เลย
+              โยนข้อความเสร่อๆ มานี่ มึง เดี๋ยวกูจัดการด่าให้พร้อมสกอร์กวนตีนกับคำแนะนำเอาไปขยี้ต่อให้มันกลัว
             </p>
             <ul className={`space-y-3 text-sm leading-relaxed ${accentText}`}>
               <li className="flex items-center gap-3">
@@ -298,7 +425,7 @@ export default function Home() {
                   1
                 </span>
                 <span>
-                  โยนข้อความสุดจะเสร่อมาให้ AI ด่าแทนแบบมีตรรกะ ไม่หลุดโฟกัส
+                  โยนความเสร่อของมันมา กูด่าแทนให้อย่างมีหลักการ ไม่หลุดโฟกัส
                 </span>
               </li>
               <li className="flex items-center gap-3">
@@ -308,7 +435,7 @@ export default function Home() {
                   2
                 </span>
                 <span>
-                  รับคะแนน ความมั่นใจ พร้อมคำวินิจฉัยสุดแสบกับคำแนะนำแก้เกม
+                  มึงจะได้คะแนน ระดับความมั่นใจ พร้อมคำวินิจฉัยสุดแสบกับท่าดัดหลังมัน
                 </span>
               </li>
               <li className="flex items-center gap-3">
@@ -318,10 +445,27 @@ export default function Home() {
                   3
                 </span>
                 <span>
-                  บันทึกโหมดที่ชอบได้ จะหม่นหรือสว่าง ระบบก็ซัดแรงไม่เปลี่ยน
+                  เลือกโหมดที่มึงถูกใจ จะหม่นหรือสว่าง กูก็ซัดแรงเท่าเดิมไม่กลัว
                 </span>
               </li>
             </ul>
+            <div className="pt-4">
+              <p className={`text-[11px] uppercase tracking-[0.35em] ${subtleText}`}>
+                คิดไม่ออกก็กดเอานี่ไปก่อนมึง
+              </p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {SAMPLE_INPUTS.map((sample) => (
+                  <button
+                    key={sample}
+                    type="button"
+                    onClick={() => handleSamplePrompt(sample)}
+                    className={`w-full rounded-2xl border px-4 py-3 text-left text-xs font-medium leading-relaxed transition ${sampleChipBase}`}
+                  >
+                    {sample}
+                  </button>
+                ))}
+              </div>
+            </div>
           </section>
 
           <section
@@ -331,21 +475,22 @@ export default function Home() {
             <div className="relative flex h-full flex-col gap-6 p-8">
               <div className="flex items-center justify-between">
                 <span className={`text-xs uppercase tracking-[0.5em] ${subtleText}`}>
-                  Input
+                  มึงพิมพ์ตรงนี้
                 </span>
                 <span
                   className={`rounded-full border px-3 py-1 text-[11px] font-medium uppercase tracking-[0.4em] transition-colors duration-500 ${badgeSurface}`}
                 >
-                  {theme === "dark" ? "Dark AF" : "Bright AF"}
+                  {theme === "dark" ? "โหมดหม่นแม่ง" : "โหมดสว่างแม่ง"}
                 </span>
               </div>
               <TextareaAutosize
+                ref={textAreaRef}
                 minRows={5}
                 maxRows={14}
                 className={`min-h-[180px] w-full resize-none rounded-2xl border border-transparent px-5 py-4 text-base leading-relaxed shadow-inner transition focus:outline-none focus:ring-2 ${isDark ? "bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus:ring-slate-500/50" : "bg-white/80 text-slate-900 placeholder:text-slate-500 focus:ring-slate-400/40"}`}
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="โยนข้อความที่คิดว่าเสร่อมาเลย เดี๋ยว AI ด่าให้ยับ..."
+                placeholder="โยนข้อความเสร่อๆ มานี่ มึง เดี๋ยวกูด่าให้ยับ..."
               />
               <button
                 type="button"
@@ -353,7 +498,7 @@ export default function Home() {
                 disabled={isLoading}
                 className={`group relative inline-flex w-full items-center justify-center rounded-2xl px-6 py-3 text-base font-semibold transition ${buttonClasses} shadow-lg shadow-slate-900/20 hover:shadow-slate-900/30 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed disabled:opacity-70`}
               >
-                {isLoading ? "กำลังจวกให้แสบ..." : "จ้วงเช็คแม่งเลย"}
+                {isLoading ? "กูกำลังซัดมันอยู่..." : "ให้กูเช็กความเสร่อแม่งเลย"}
                 <span className="ml-3 h-2 w-2 rounded-full bg-white transition-all duration-300 group-hover:w-3" />
               </button>
               {isLoading && (
@@ -361,7 +506,7 @@ export default function Home() {
                   className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium ${loadingSurface}`}
                 >
                   <span className="inline-flex h-6 w-6 animate-spin rounded-full border-[3px] border-current border-t-transparent" />
-                  <span>กำลังวิเคราะห์อยู่ ใจเย็นๆ เดี๋ยวจัดให้</span>
+                  <span>กูกำลังวิเคราะห์อยู่ ใจเย็นๆ เดี๋ยวกูจัดให้</span>
                 </div>
               )}
               {errorMessage && !isLoading && (
@@ -382,16 +527,16 @@ export default function Home() {
             <header className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p className={`text-xs uppercase tracking-[0.5em] ${subtleText}`}>
-                  ผลวินิจฉัย
+                  สิ่งที่กูจับได้
                 </p>
                 <h2 className="mt-2 text-3xl font-bold md:text-4xl">
-                  AI สรุปให้แบบตรงๆ ไม่มียั้ง
+                  กูสรุปให้มึงแบบตรงๆ ไม่มียั้ง
                 </h2>
               </div>
               <span
                 className={`rounded-full border px-4 py-1 text-xs font-semibold uppercase tracking-[0.4em] transition-colors duration-500 ${badgeSurface}`}
               >
-                ความมั่นใจ {result.confidence}
+                กูมั่นใจ {result.confidence}
               </span>
             </header>
 
@@ -408,8 +553,28 @@ export default function Home() {
                   {result.score}
                 </p>
                 <p className={`mt-2 text-sm ${accentText}`}>
-                  คะแนนความเสร่อ ยิ่งสูงยิ่งน่าหัวเราะ
+                  คะแนนความเสร่อ ยิ่งสูงกูก็ยิ่งขำ
                 </p>
+                {scoreTier && (
+                  <>
+                    <span
+                      className={`mt-4 inline-flex items-center justify-center rounded-full px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.35em] ${tierBadgeClass}`}
+                    >
+                      {scoreTier.label}
+                    </span>
+                    <p className={`mt-3 text-xs leading-relaxed ${accentText}`}>
+                      {scoreTier.description}
+                    </p>
+                    <div
+                      className={`mt-6 h-2.5 w-full overflow-hidden rounded-full transition-colors duration-500 ${progressTrackClass}`}
+                    >
+                      <div
+                        className={`h-full bg-gradient-to-r transition-all duration-700 ease-out ${tierBarGradient}`}
+                        style={{ width: `${normalizedScore}%` }}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="space-y-5">
@@ -443,7 +608,7 @@ export default function Home() {
         )}
 
         <footer className={`mb-10 text-center text-xs ${accentText}`}>
-          <p>ทำขำๆ อยากเช็กความเสร่อก็จัดไป วสุโชค ใจน้ำ</p>
+          <p>ทำเอามันส์ๆ กูอยากให้มึงเช็กความเสร่อก็จัดไป — วสุโชค ใจน้ำ</p>
         </footer>
       </div>
     </div>

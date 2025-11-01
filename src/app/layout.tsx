@@ -22,7 +22,7 @@ const notoSansThai = Noto_Sans_Thai({
 export const metadata: Metadata = {
   title: "CheckSero AI — Roast Analyzer",
   description:
-    "เช็กความเสร่อของข้อความแบบดุเดือด พร้อมโหมดสว่าง-มืด และคำแนะนำกวนๆ จาก AI.",
+    "กูช่วยมึงเช็กความเสร่อของข้อความแบบดุเดือด พร้อมโหมดมืดสว่างและคำแนะนำกวนๆ จาก AI.",
 };
 
 export default function RootLayout({
