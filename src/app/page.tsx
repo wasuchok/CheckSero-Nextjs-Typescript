@@ -17,10 +17,10 @@ type ThemeMode = "light" | "dark";
 
 const THEME_STORAGE_KEY = "checksero_theme";
 const SAMPLE_INPUTS = [
-  'เพื่อนเวรโพสต์ว่า "ปีนี้ต้องรวย" ทั้งที่หนี้บัตรเครดิตยังพะรุงพะรัง กูต้องจวกแม่งยังไงให้เข็ด',
-  "กูนั่ง MRT แล้วมีคนเปิดเพลงดังทำฟอร์มใหญ่อีก กูควรตะคอกกลับยังไงให้มันหลบหน้า",
-  "ไอ้สัสในทีมชอบขโมยเครดิตงานกู จะใส่เสียดายังไงไม่ให้โดน HR ฟาดกลับ",
-  "มันแซะว่ากูยังใช้มือถือรุ่นเก่าอยู่ จัดหมัดคำด่ายังไงให้มันเงิบ",
+  'เพื่อนมันโพสต์ว่า "ปีนี้ต้องรวย" ทั้งที่เป็นหนี้บัตรเครดิตอยู่ ผมจะจวกยังไงดี',
+  "เจอคนเปิดเพลงดังใน MRT แล้วทำหน้ามั่นหน้ามั่นใจ ควรตอบกลับแบบไหนให้หน้าหงาย",
+  "คนในทีมชอบขโมยเครดิตงานคนอื่น ใส่เสียดายังไงไม่ให้โดนฟ้อง",
+  "มีคนแซะว่าผมยังใช้มือถือรุ่นเก่าอยู่ จัดหนักให้หน่อยจะได้หายกร่าง",
 ] as const;
 
 type ScoreTierConfig = {
@@ -42,7 +42,7 @@ const SCORE_TIERS: Array<{ min: number; config: ScoreTierConfig }> = [
     config: {
       label: "ไฟลุกทั้งซอย",
       description:
-        "ระดับความเสร่อมึงพุ่งเกินร้อย กูนี่อยากจับหัวมันกดฝาท่อแล้วเผายับซ้ำอีกที",
+        "ระดับความเสร่อพุ่งเกินร้อย แบบนี้ต้องจับหัวกดฝาท่อแล้วเผายับซ้ำอีกที",
       badge: {
         light: "border-rose-200 bg-rose-100/80 text-rose-600",
         dark: "border-rose-500/50 bg-rose-500/20 text-rose-200",
@@ -58,7 +58,7 @@ const SCORE_TIERS: Array<{ min: number; config: ScoreTierConfig }> = [
     config: {
       label: "เกรียนไฟลุก",
       description:
-        "ดีกรีเสร่อของมันนี่เกิดเป็นไวรัลได้ กูจะด่าแทนให้เละอย่าให้เหลือซาก",
+        "ดีกรีเสร่อถึงขั้นเป็นไวรัลได้ ฮาให้สุดแล้วฝากด่าให้ยับอย่าให้เหลือซาก",
       badge: {
         light: "border-amber-200 bg-amber-100/80 text-amber-600",
         dark: "border-amber-500/40 bg-amber-500/15 text-amber-200",
@@ -74,7 +74,7 @@ const SCORE_TIERS: Array<{ min: number; config: ScoreTierConfig }> = [
     config: {
       label: "เริ่มแสบคัน",
       description:
-        "ยังไม่ถึงขั้นไฟลุก แต่มึงแค่สะกิดกูก็พร้อมเคลือบแผลด้วยลวดหนามให้มันจุก",
+        "ยังไม่ถึงขั้นไฟลุก แต่ก็ชวนเคลือบแผลด้วยลวดหนาม สวนกลับเบาๆ ก็จุกแล้ว",
       badge: {
         light: "border-sky-200 bg-sky-100/80 text-sky-600",
         dark: "border-sky-500/40 bg-sky-500/15 text-sky-200",
@@ -90,7 +90,7 @@ const SCORE_TIERS: Array<{ min: number; config: ScoreTierConfig }> = [
     config: {
       label: "พอขำๆ",
       description:
-        "ยังเสร่อไม่สุด แต่กูก็คันปากอยากตบสลับข้างให้วงมันมีสีสันหน่อย",
+        "ยังเสร่อไม่สุด แค่คันปากนิดหน่อย ตบสลับข้างให้พอมีสีสันในวงสนทนา",
       badge: {
         light: "border-slate-200 bg-slate-100/80 text-slate-600",
         dark: "border-slate-600/50 bg-slate-800/40 text-slate-200",
@@ -231,9 +231,7 @@ export default function Home() {
   const checkSero = async () => {
     if (!inputText.trim()) {
       setResult(null);
-      setErrorMessage(
-        "พิมพ์ข้อความเห่ยๆ มาก่อนดิ มึงจะให้กูเดาคะแนนเสร่อจากอากาศหรือไง",
-      );
+      setErrorMessage("พิมพ์ข้อความมาก่อน แล้วค่อยให้ AI ช่วยวิเคราะห์นะ");
       return;
     }
 
@@ -260,7 +258,7 @@ export default function Home() {
 
       if (!res.ok || data?.error) {
         setErrorMessage(
-          data?.error ?? "API งอแงอีกแล้วว่ะ มึงลองกดใหม่อีกรอบดิ",
+          data?.error ?? "API มีปัญหาชั่วคราว ลองใหม่อีกครั้งนะ",
         );
         return;
       }
@@ -268,7 +266,7 @@ export default function Home() {
       setResult(data);
     } catch (error) {
       console.error("Error:", error);
-      setErrorMessage("เน็ตหรือ API แม่งล่ม กูว่ามึงลองใหม่อีกรอบดิ");
+      setErrorMessage("มีปัญหาในการเชื่อมต่อกับ API ลองใหม่อีกครั้งนะ");
     } finally {
       setIsLoading(false);
       setTimeout(() => {
@@ -387,7 +385,7 @@ export default function Home() {
               CheckSero Lab
             </span>
             <p className="text-lg font-semibold md:text-xl">
-              AI กูนั่งเฝ้าความเสร่อให้มึงตลอด 24 ชั่วโมง
+              AI วิเคราะห์ความเสร่อแบบถึงใจ เปิด 24 ชั่วโมง
             </p>
           </div>
           <button
@@ -400,7 +398,7 @@ export default function Home() {
             ) : (
               <MoonIcon className="h-4 w-4" />
             )}
-            <span>{isDark ? "เอาให้สว่างหน่อย" : "ขอความมืดให้กูที"}</span>
+            <span>{isDark ? "โหมดสว่าง" : "โหมดมืด"}</span>
           </button>
         </nav>
 
@@ -409,13 +407,14 @@ export default function Home() {
             <span
               className={`inline-flex items-center rounded-full border px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] transition-colors duration-500 ${badgeSurface}`}
             >
-              กูพร้อมจวก
+              Roast Mode
             </span>
             <h1 className="text-4xl font-black leading-tight md:text-5xl">
-              ให้ AI กูจวกความเสร่อแทนมึงแบบถึงพริกถึงขิง
+              ให้ AI จวกความเสร่อแทนคุณแบบถึงพริกถึงขิง
             </h1>
             <p className={`text-base leading-relaxed ${accentText}`}>
-              โยนข้อความเสร่อๆ มานี่ มึง เดี๋ยวกูจัดการด่าให้พร้อมสกอร์กวนตีนกับคำแนะนำเอาไปขยี้ต่อให้มันกลัว
+              ส่งข้อความที่คิดว่าเสร่อมาเหอะ เดี๋ยวระบบนี้จัดการด่าให้
+              พร้อมสกอร์และคำแนะนำแบบกวนๆ เอาไปขยี้ต่อได้เลย
             </p>
             <ul className={`space-y-3 text-sm leading-relaxed ${accentText}`}>
               <li className="flex items-center gap-3">
@@ -425,7 +424,7 @@ export default function Home() {
                   1
                 </span>
                 <span>
-                  โยนความเสร่อของมันมา กูด่าแทนให้อย่างมีหลักการ ไม่หลุดโฟกัส
+                  โยนข้อความสุดจะเสร่อมาให้ AI ด่าแทนแบบมีตรรกะ ไม่หลุดโฟกัส
                 </span>
               </li>
               <li className="flex items-center gap-3">
@@ -435,7 +434,7 @@ export default function Home() {
                   2
                 </span>
                 <span>
-                  มึงจะได้คะแนน ระดับความมั่นใจ พร้อมคำวินิจฉัยสุดแสบกับท่าดัดหลังมัน
+                  รับคะแนน ความมั่นใจ พร้อมคำวินิจฉัยสุดแสบกับคำแนะนำแก้เกม
                 </span>
               </li>
               <li className="flex items-center gap-3">
@@ -445,13 +444,13 @@ export default function Home() {
                   3
                 </span>
                 <span>
-                  เลือกโหมดที่มึงถูกใจ จะหม่นหรือสว่าง กูก็ซัดแรงเท่าเดิมไม่กลัว
+                  บันทึกโหมดที่ชอบได้ จะหม่นหรือสว่าง ระบบก็ซัดแรงไม่เปลี่ยน
                 </span>
               </li>
             </ul>
             <div className="pt-4">
               <p className={`text-[11px] uppercase tracking-[0.35em] ${subtleText}`}>
-                คิดไม่ออกก็กดเอานี่ไปก่อนมึง
+                กดลองตัวอย่างก็ได้
               </p>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {SAMPLE_INPUTS.map((sample) => (
@@ -475,12 +474,12 @@ export default function Home() {
             <div className="relative flex h-full flex-col gap-6 p-8">
               <div className="flex items-center justify-between">
                 <span className={`text-xs uppercase tracking-[0.5em] ${subtleText}`}>
-                  มึงพิมพ์ตรงนี้
+                  Input
                 </span>
                 <span
                   className={`rounded-full border px-3 py-1 text-[11px] font-medium uppercase tracking-[0.4em] transition-colors duration-500 ${badgeSurface}`}
                 >
-                  {theme === "dark" ? "โหมดหม่นแม่ง" : "โหมดสว่างแม่ง"}
+                  {theme === "dark" ? "Dark AF" : "Bright AF"}
                 </span>
               </div>
               <TextareaAutosize
@@ -490,7 +489,7 @@ export default function Home() {
                 className={`min-h-[180px] w-full resize-none rounded-2xl border border-transparent px-5 py-4 text-base leading-relaxed shadow-inner transition focus:outline-none focus:ring-2 ${isDark ? "bg-slate-950/60 text-slate-100 placeholder:text-slate-500 focus:ring-slate-500/50" : "bg-white/80 text-slate-900 placeholder:text-slate-500 focus:ring-slate-400/40"}`}
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="โยนข้อความเสร่อๆ มานี่ มึง เดี๋ยวกูด่าให้ยับ..."
+                placeholder="โยนข้อความที่คิดว่าเสร่อมาเลย เดี๋ยว AI ด่าให้ยับ..."
               />
               <button
                 type="button"
@@ -498,7 +497,7 @@ export default function Home() {
                 disabled={isLoading}
                 className={`group relative inline-flex w-full items-center justify-center rounded-2xl px-6 py-3 text-base font-semibold transition ${buttonClasses} shadow-lg shadow-slate-900/20 hover:shadow-slate-900/30 focus:outline-none focus:ring-2 focus:ring-white/20 disabled:cursor-not-allowed disabled:opacity-70`}
               >
-                {isLoading ? "กูกำลังซัดมันอยู่..." : "ให้กูเช็กความเสร่อแม่งเลย"}
+                {isLoading ? "กำลังจวกให้แสบ..." : "จ้วงเช็คแม่งเลย"}
                 <span className="ml-3 h-2 w-2 rounded-full bg-white transition-all duration-300 group-hover:w-3" />
               </button>
               {isLoading && (
@@ -506,7 +505,7 @@ export default function Home() {
                   className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-medium ${loadingSurface}`}
                 >
                   <span className="inline-flex h-6 w-6 animate-spin rounded-full border-[3px] border-current border-t-transparent" />
-                  <span>กูกำลังวิเคราะห์อยู่ ใจเย็นๆ เดี๋ยวกูจัดให้</span>
+                  <span>กำลังวิเคราะห์อยู่ ใจเย็นๆ เดี๋ยวจัดให้</span>
                 </div>
               )}
               {errorMessage && !isLoading && (
@@ -527,16 +526,16 @@ export default function Home() {
             <header className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <p className={`text-xs uppercase tracking-[0.5em] ${subtleText}`}>
-                  สิ่งที่กูจับได้
+                  ผลวินิจฉัย
                 </p>
                 <h2 className="mt-2 text-3xl font-bold md:text-4xl">
-                  กูสรุปให้มึงแบบตรงๆ ไม่มียั้ง
+                  AI สรุปให้แบบตรงๆ ไม่มียั้ง
                 </h2>
               </div>
               <span
                 className={`rounded-full border px-4 py-1 text-xs font-semibold uppercase tracking-[0.4em] transition-colors duration-500 ${badgeSurface}`}
               >
-                กูมั่นใจ {result.confidence}
+                ความมั่นใจ {result.confidence}
               </span>
             </header>
 
@@ -553,7 +552,7 @@ export default function Home() {
                   {result.score}
                 </p>
                 <p className={`mt-2 text-sm ${accentText}`}>
-                  คะแนนความเสร่อ ยิ่งสูงกูก็ยิ่งขำ
+                  คะแนนความเสร่อ ยิ่งสูงยิ่งน่าหัวเราะ
                 </p>
                 {scoreTier && (
                   <>
@@ -608,7 +607,7 @@ export default function Home() {
         )}
 
         <footer className={`mb-10 text-center text-xs ${accentText}`}>
-          <p>ทำเอามันส์ๆ กูอยากให้มึงเช็กความเสร่อก็จัดไป — วสุโชค ใจน้ำ</p>
+          <p>ทำขำๆ อยากเช็กความเสร่อก็จัดไป วสุโชค ใจน้ำ</p>
         </footer>
       </div>
     </div>
