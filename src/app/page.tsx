@@ -124,6 +124,7 @@ export default function Home() {
   const [isThemeReady, setIsThemeReady] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
+  const resultSectionRef = useRef<HTMLDivElement | null>(null);
   const themeSwitchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const applyTheme = useCallback((mode: ThemeMode) => {
@@ -207,6 +208,25 @@ export default function Home() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (!result || isLoading) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      resultSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 120);
+
+    return () => window.clearTimeout(timeout);
+  }, [result, isLoading]);
 
   const toggleTheme = () => {
     setIsTransitioning(true);
@@ -521,6 +541,7 @@ export default function Home() {
 
         {result && !isLoading && (
           <section
+            ref={resultSectionRef}
             className={`relative mb-16 w-full rounded-[32px] border p-8 backdrop-blur-xl transition-all duration-500 md:p-10 ${resultSurface}`}
           >
             <header className="flex flex-wrap items-center justify-between gap-4">
